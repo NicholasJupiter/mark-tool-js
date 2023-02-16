@@ -10,6 +10,10 @@
   "files": [
     "dist"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NicholasJupiter/mark-tool-js"
+  },
   "homepage": "https://github.com/NicholasJupiter/mark-tool-js",
   "keywords": ["label", "ai", "Annotation", "marker", "Mark"],
   "author": "Jupiter <xiong0201y@163.com>",
