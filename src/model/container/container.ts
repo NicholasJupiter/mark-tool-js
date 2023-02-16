@@ -63,4 +63,7 @@ export class Container {
   startDraw(type: TDrawType) {
     this.$SvgWrap.currDrawType = type;
   }
+  endDraw() {
+    this.$SvgWrap.currDrawType = null;
+  }
 }

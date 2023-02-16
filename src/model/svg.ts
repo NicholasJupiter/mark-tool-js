@@ -18,19 +18,15 @@ export class SVGWrap {
     this.initSvgWrap(_$svgWrap);
     this.$svgContainer = window.SVG(this.$svgWrap);
 
-    this.$svgContainer.on(
-      'click',
-      () => {
-        for (let i = 0; i < this.$svgContainer.node.children.length; i++) {
-          const child = this.$svgContainer.node.children.item(i);
-          const contentEl = window.SVG.get(child.id).node.querySelector('[class^=svgjs-]');
-          if (contentEl) {
-            window.SVG.get(contentEl.id).selectize(false);
-          }
+    this.$svgContainer.on('click', () => {
+      for (let i = 0; i < this.$svgContainer.node.children.length; i++) {
+        const child = this.$svgContainer.node.children.item(i);
+        const contentEl = window.SVG.get(child.id).node.querySelector('[class^=svgjs-]');
+        if (contentEl) {
+          window.SVG.get(contentEl.id).selectize(false);
         }
-      },
-      false
-    );
+      }
+    });
 
     window.addEventListener('svgjs-del', (data: any) => {
       const $svg = data.detail.$svgEl;
@@ -107,13 +103,12 @@ export class SVGWrap {
     const currDraw = Draws[this.currDrawType];
     if (currDraw?.onMouseDown) {
       this.currSvg = currDraw.onMouseDown(detail);
-
       this.currSvg[1].on(
-        'click',
+        'click,touchstart',
         (event: any) => {
           const _svg = window.SVG.get(event.currentTarget.id);
           _svg.selectize().resize();
-          event.stopPropagation();
+          event.type !== 'touchstart' && event.stopPropagation();
         },
         false
       );
