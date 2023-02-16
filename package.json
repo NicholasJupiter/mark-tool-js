@@ -1,0 +1,47 @@
+{
+  "name": "mark-tool-js",
+  "version": "1.0.0",
+  "description": "Annotation tools",
+  "main": "dist/index.min.js",
+  "scripts": {
+    "dev": "webpack-dev-server --config ./config/webpack.dev.config.js",
+    "build": "webpack --config ./config/webpack.prod.config.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": ["label", "ai", "Annotation", "marker", "Mark"],
+  "author": "Jupiter <xiong0201y@163.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@babel/core": "^7.20.12",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "babel-loader": "^9.1.2",
+    "clean-webpack-plugin": "^4.0.0",
+    "copy-webpack-plugin": "^11.0.0",
+    "css-loader": "^6.7.3",
+    "eslint": "^8.0.1",
+    "eslint-config-standard-with-typescript": "^34.0.0",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "less": "^4.1.3",
+    "less-loader": "^11.1.0",
+    "style-loader": "^3.3.1",
+    "ts-loader": "^9.4.2",
+    "tslint": "^6.1.3",
+    "typescript": "*",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1",
+    "webpack-merge": "^5.8.0"
+  },
+  "dependencies": {
+    "@svgdotjs/svg.draggable.js": "^3.0.2",
+    "@svgdotjs/svg.js": "^3.1.2",
+    "svg.resize.js": "^1.4.3"
+  }
+}

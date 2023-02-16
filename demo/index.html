@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Webpack App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      *{
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      .work-container{
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        overflow: hidden;
+      }
+      .work-container__left{
+        width: 140px;
+        border-right: 1px solid #ccc;
+        height: 100%;
+      }
+      .work-container__content{
+        flex: 1;
+        overflow: auto;
+        height: 100%;
+      }
+      .work-container__right{
+        width: 200px;
+        border-left: 1px solid #ccc;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="work-container" id="work-container">
+      <div class="work-container__left">
+        <div class="item" id="rect">Rect</div>
+      </div>
+      <div class="work-container__content">
+        <div class="work-container__content-wrap">
+          <img draggable="false" src="" alt="" class="work-img" />
+          <div class="work-container__svg-wrap">
+            <!-- <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:svgjs="http://svgjs.com/svgjs"></svg> -->
+          </div>
+          <div class="work-container__lines-wrap">
+            <div class="v_line"></div>
+            <div class="h_line"></div>
+            <span class="tooltip-span">X:100<br/>Y:100 </span>
+          </div>
+        </div>
+      </div>
+      <div class="work-container__right"></div>
+    </div>
+  </body>
+  
+</html>

@@ -1,0 +1,105 @@
+.work-container{
+  --location-x: 100px;
+  --location-y: 200px;
+  --line-color: #e96a6ac7;
+  --svg-fill-color: #ff0;
+  --svg-fill-opacity: 0.1;
+  --svg-stroke-color: green;
+  --svg-stroke-width: 2px;
+  --svg-circle-point-stroke-color: gray;
+  --svg-circle-point-fill-color: black;
+  --svg-circle-point-fill-opacity: 0.4;
+  --img-width: 0;
+  --img-height: 0;
+
+  &__left{
+    >div{
+      width: 100%;
+      height: 100px;
+      text-align: center;
+      line-height: 100px;
+      background-color: #ccc;
+      cursor: pointer;
+      &:hover{
+        background-color: #888;
+        color: white;
+      }
+    }
+  }
+
+  &__content{
+    user-select: none;
+  }
+
+  &__content-wrap{
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    position: relative;
+
+    >.work-container__svg-wrap{
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: var(--img-width);
+      height: var(--img-height);
+      >svg{
+        width: 100%;
+        height: 100%;
+        circle, rect {
+          fill: var(--svg-fill-color);
+          stroke: var(--svg-stroke-color);
+          stroke-width: var(--svg-stroke-width);
+          fill-opacity: var(--svg-fill-opacity);
+        }
+        circle.svg_select_points{
+          fill: var(--svg-circle-point-fill-color);
+          fill-opacity: var(--svg-circle-point-fill-opacity);
+          stroke: var(--svg-circle-point-stroke-color);
+        }
+        >svg{
+          cursor: move;
+        }
+      }
+    }
+  }
+
+  &__lines-wrap {
+    width: 100%;
+    pointer-events: none;
+    display: none;
+    >div{
+      position: absolute;
+      background-color: var(--line-color);
+      z-index: 10;
+      
+      &.v_line{
+        top: var(--location-y);
+        height: 2px;
+        width: var(--img-width);
+      }
+      &.h_line{
+        left: var(--location-x);
+        width: 2px;
+        top: 0;
+        height: var(--img-height);
+      }
+    }
+    >.tooltip-span{
+      position: absolute;
+      top: calc(var(--location-y) + 20px);
+      left: calc(var(--location-x) + 20px);
+      background-color: rgba(0, 0, 0, .4);
+      color: white;
+      padding: 10px;
+      border-radius: 4px;
+    }
+  }
+
+  &:has(.work-container__svg-wrap:hover){
+    .work-container__lines-wrap {
+      display: block;
+    }
+  }
+  
+}
