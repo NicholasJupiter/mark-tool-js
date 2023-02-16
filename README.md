@@ -1,4 +1,4 @@
-# ai Annotation tools
+# Mark tool
 ## How to use ?
 `yarn`
 
