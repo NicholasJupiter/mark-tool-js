@@ -10,8 +10,7 @@
     "baseUrl": "."
   },
   "include": [
-    "src",
-    "./src/**/.d.ts"
+    "./src/**/*",
   ],
   "exclude": [
     "node_modules",
