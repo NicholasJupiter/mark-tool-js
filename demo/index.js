@@ -1,8 +1,11 @@
 
-import { Container } from '../src/index';
+import MarkToolJs from '../dist/index.min.js'
+const a = require('../dist/index.min.js')
 
-const $container = document.getElementById('work-container');
-const testImg = require('./assets/img.jpeg');
-const container = new Container($container, testImg.default);
+console.log(a, MarkToolJs, 'MarkToolJs')
 
-container.startDraw('rect');
+// const $container = document.getElementById('work-container')
+// const testImg = require('./assets/img.jpeg')
+// const container = new Container($container, testImg.default)
+
+// container.startDraw('rect')

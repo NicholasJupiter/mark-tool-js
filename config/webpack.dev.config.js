@@ -10,12 +10,17 @@ module.exports = merge(baseConfig, {
   entry: {
     index: resolve(rootPath, 'demo/index.js')
   },
+  output: {
+    filename: '[name].min.js',
+    path: resolve(rootPath, 'dist-demo')
+  },
+
   devServer: {
     static: {
-      directory: resolve(rootPath, 'dist')
+      directory: resolve(rootPath, 'dist-demo')
     },
     compress: true,
-    port: 9000
+    port: 2000
   },
   plugins: [
     new HtmlWebpackPlugin({

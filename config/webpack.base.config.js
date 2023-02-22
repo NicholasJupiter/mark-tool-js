@@ -8,9 +8,12 @@ module.exports = {
   output: {
     filename: '[name].min.js',
     path: resolve(rootPath, 'dist'),
-    library: 'MarkToolJs',
-    libraryTarget: 'umd',
-    libraryExport: 'default'
+    chunkFilename: '[id].js',
+    library: {
+      name: 'MatkToolJs',
+      type: 'umd'
+    },
+    libraryTarget: 'umd'
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js']
@@ -19,11 +22,13 @@ module.exports = {
     rules: [
       {
         test: /.(less|css)$/i,
-        use: ['style-loader', 'css-loader', 'less-loader']
+        use: ['style-loader', 'css-loader', 'less-loader'],
+        exclude: /node-modules/
       },
       {
         test: /\.(png|jpe?g|gif|svg)$/,
-        loader: 'file-loader'
+        loader: 'file-loader',
+        exclude: /node-modules/
       },
       {
         test: /\.ts$/,

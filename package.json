@@ -1,11 +1,12 @@
 {
   "name": "mark-tool-js",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "Annotation tools",
-  "main": "dist/index.js",
+  "main": "dist/index.min.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "dev": "webpack-dev-server --config ./config/webpack.dev.config.js",
-    "build": "tsc"
+    "build": "webpack --config ./config/webpack.prod.config.js"
   },
   "files": [
     "dist"
