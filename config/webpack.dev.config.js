@@ -1,9 +1,9 @@
-const baseConfig = require('./webpack.base.config');
-const { resolve } = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const CopyWebpackPlugin = require('copy-webpack-plugin');
-const { merge } = require('webpack-merge');
-const rootPath = resolve(__dirname, '../');
+const baseConfig = require('./webpack.base.config')
+const { resolve } = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
+const { merge } = require('webpack-merge')
+const rootPath = resolve(__dirname, '../')
 
 module.exports = merge(baseConfig, {
   mode: 'development',
@@ -31,4 +31,4 @@ module.exports = merge(baseConfig, {
       ]
     })
   ]
-});
+})

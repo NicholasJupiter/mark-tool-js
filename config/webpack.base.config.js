@@ -1,12 +1,12 @@
-const webpack = require('webpack');
-const { name } = require('../package.json');
-const { resolve } = require('path');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const rootPath = resolve(__dirname, '../');
+const webpack = require('webpack')
+const { name } = require('../package.json')
+const { resolve } = require('path')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const rootPath = resolve(__dirname, '../')
 
 module.exports = {
   output: {
-    filename: `[name].min.js`,
+    filename: '[name].min.js',
     path: resolve(rootPath, 'dist'),
     library: `${name}`,
     libraryTarget: 'umd'
@@ -41,4 +41,4 @@ module.exports = {
     new webpack.optimize.ModuleConcatenationPlugin(),
     new CleanWebpackPlugin()
   ]
-};
+}
