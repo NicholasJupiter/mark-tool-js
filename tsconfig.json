@@ -1,16 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
+    "target": "ES5",
     "module": "ESNext",
     "declaration": true,
     "outDir": "./dist",
-    "strict": false,
+    "strict": true,
+    "lib": ["es6"],
     "skipLibCheck": true,
     "moduleResolution": "node",
-    "baseUrl": "."
+    "baseUrl": ".",
+    "allowJs": true,
+    // "checkJs": true,
+    "allowSyntheticDefaultImports": true,
   },
   "include": [
     "./src/**/*",
+    "./src/**/*.js",
   ],
   "exclude": [
     "node_modules",

@@ -1,5 +1,5 @@
 const webpack = require('webpack')
-const { name } = require('../package.json')
+// const { name } = require('../package.json')
 const { resolve } = require('path')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const rootPath = resolve(__dirname, '../')
@@ -8,8 +8,9 @@ module.exports = {
   output: {
     filename: '[name].min.js',
     path: resolve(rootPath, 'dist'),
-    library: `${name}`,
-    libraryTarget: 'umd'
+    library: 'MarkToolJs',
+    libraryTarget: 'umd',
+    libraryExport: 'default'
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js']

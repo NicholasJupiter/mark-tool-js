@@ -1,6 +1,6 @@
 {
   "name": "mark-tool-js",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Annotation tools",
   "main": "dist/index.js",
   "scripts": {
@@ -15,7 +15,13 @@
     "url": "https://github.com/NicholasJupiter/mark-tool-js"
   },
   "homepage": "https://github.com/NicholasJupiter/mark-tool-js",
-  "keywords": ["label", "ai", "Annotation", "marker", "Mark"],
+  "keywords": [
+    "label",
+    "ai",
+    "Annotation",
+    "marker",
+    "Mark"
+  ],
   "author": "Jupiter <xiong0201y@163.com>",
   "license": "MIT",
   "devDependencies": {
@@ -36,6 +42,7 @@
     "less-loader": "^11.1.0",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.4.2",
+    "ts-node": "^10.9.1",
     "tslint": "^6.1.3",
     "typescript": "*",
     "url-loader": "^4.1.1",
