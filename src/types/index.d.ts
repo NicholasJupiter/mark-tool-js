@@ -13,6 +13,7 @@ declare module '@svgdotjs/svg.js' {
     selectize(...args): this;
     resize(): this;
     get(...args): this;
+    draggable(arg1?: boolean = true): this;
   }
 }
 

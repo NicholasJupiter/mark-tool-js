@@ -1,6 +1,6 @@
 {
   "name": "mark-tool-js",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Annotation tools",
   "main": "dist/index.min.js",
   "types": "dist/index.d.ts",
@@ -53,8 +53,6 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "@svgdotjs/svg.draggable.js": "^3.0.2",
-    "@svgdotjs/svg.js": "^3.1.2",
-    "svg.resize.js": "^1.4.3"
+    "@svgdotjs/svg.js": "^3.1.2"
   }
 }

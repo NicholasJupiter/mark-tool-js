@@ -3,6 +3,7 @@ const { resolve } = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const { merge } = require('webpack-merge')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const rootPath = resolve(__dirname, '../')
 
 module.exports = merge(baseConfig, {
@@ -34,6 +35,13 @@ module.exports = merge(baseConfig, {
           to: resolve(rootPath, './assets/dist/')
         }
       ]
+    }),
+    new CleanWebpackPlugin({
+      cleanOnceBeforeBuildPatterns: [
+        resolve(rootPath, 'dist-demo/*'),
+        resolve(rootPath, 'dist/*')
+      ],
+      dangerouslyAllowCleanPatternsOutsideProject: true
     })
   ]
 })

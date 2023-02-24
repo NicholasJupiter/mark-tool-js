@@ -18,6 +18,7 @@ export class ImgWrap {
   }
 
   updateSrc(src: string) {
+    if (!src) return;
     loadImage(src).then(($img) => {
       $img.setAttribute('draggable', 'false');
       $img.classList.add('work-img');

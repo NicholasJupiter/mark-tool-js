@@ -1,7 +1,7 @@
 import type { Svg } from '@svgdotjs/svg.js';
 import { TCustomDragDetail, TDrawReturn, TDrawType, TSVGChlid, TSvgData } from '../types/svg';
 import { Draws } from '../draws/index';
-import { findParentBySvg, getNodeProps } from '../svg.js/utils/utils.svg';
+import { findParentBySvg, getNodeProps, throttle } from '../svg.js/utils/utils.svg';
 import { getVertexPosition, isMobile } from '../utils/utils';
 
 export class SVGWrap {
@@ -13,18 +13,15 @@ export class SVGWrap {
   currSvg: TDrawReturn = null;
   currClickSvg: Svg;
   svgsData: TSvgData[] = [];
+  isPreview = false;
 
   constructor(_$svgWrap: HTMLDivElement) {
     this.initSvgWrap(_$svgWrap);
     this.$svgContainer = window.SVG(this.$svgWrap);
 
-    this.$svgContainer.on('click', () => {
-      for (let i = 0; i < this.$svgContainer.node.children.length; i++) {
-        const child = this.$svgContainer.node.children.item(i);
-        const contentEl = window.SVG.get(child.id).node.querySelector('[class^=svgjs-]');
-        if (contentEl) {
-          window.SVG.get(contentEl.id).selectize(false);
-        }
+    this.$svgContainer.on('click', (event) => {
+      if (!(event.target as HTMLElement).classList.contains('svg_select_points')) {
+        this.removeSelectize();
       }
     });
 
@@ -34,6 +31,25 @@ export class SVGWrap {
       this.svgsData.splice(index, 1);
       $svg.remove();
     });
+  }
+
+  removeSelectize(fn?: (child: Svg, contentEl?: Svg) => void) {
+    for (let i = 0; i < this.$svgContainer.node.children.length; i++) {
+      const child = this.$svgContainer.node.children.item(i);
+      const contentEl = window.SVG.get(child.id).node.querySelector('[class^=svgjs-]');
+      if (contentEl) {
+        window.SVG.get(contentEl.id).selectize(false);
+      }
+      fn && fn(window.SVG.get(child.id), contentEl && window.SVG.get(contentEl.id));
+    }
+  }
+
+  switchPreviewStatus(_isPreview: boolean): boolean {
+    this.isPreview = _isPreview ?? !this.isPreview;
+    this.removeSelectize((child) => {
+      child.draggable(!this.isPreview);
+    });
+    return this.isPreview;
   }
 
   initSvgWrap(_$svgWrap: HTMLDivElement) {
@@ -94,60 +110,75 @@ export class SVGWrap {
       // touch start
       return;
     }
+    if ((event.target as HTMLElement).parentElement === event.currentTarget && !this.isPreview) {
+      this.mouseDownClient = {
+        offsetX: x,
+        offsetY: y
+      };
+      const detail = this.getDetails(event, x, y);
+      const currDraw = Draws[this.currDrawType];
 
-    this.mouseDownClient = {
-      offsetX: x,
-      offsetY: y
-    };
-    const detail = this.getDetails(event, x, y);
-    const currDraw = Draws[this.currDrawType];
-    if (currDraw?.onMouseDown) {
-      this.currSvg = currDraw.onMouseDown(detail);
-      this.currSvg[1].on(
-        'click,touchstart',
-        (event: any) => {
-          const _svg = window.SVG.get(event.currentTarget.id);
-          _svg.selectize().resize();
-          event.type !== 'touchstart' && event.stopPropagation();
-        },
-        false
-      );
-
-      const observer = new window.MutationObserver((mutations) => {
-        const target = mutations[0].target as unknown as HTMLElement;
-        const _svgData = this.svgsData.find(({ svg }) => (svg.node as any) === target);
-        const { x: svgX, y: svgY } = getNodeProps(_svgData.svg.node as unknown as HTMLElement);
-        const { x: childX, y: childY } = getNodeProps(
-          _svgData.child.svg.node as unknown as HTMLElement
+      if (currDraw?.onMouseDown) {
+        this.currSvg = currDraw.onMouseDown(detail);
+        if (!this.isPreview) {
+          this.currSvg[0].draggable();
+        }
+        this.currSvg[1].on(
+          'click,touchstart',
+          (event: any) => {
+            if (!this.isPreview) {
+              this.removeSelectize();
+              const _svg = window.SVG.get(event.currentTarget.id);
+              _svg.selectize().resize();
+            }
+            event.type !== 'touchstart' && event.stopPropagation();
+          },
+          false
         );
-        _svgData.x = svgX;
-        _svgData.y = svgY;
-        _svgData.child.x = childX;
-        _svgData.child.y = childY;
-      });
 
-      observer.observe(this.currSvg[0].node, {
-        childList: true,
-        attributes: true
-      });
+        const observer = new window.MutationObserver((mutations) => {
+          const target = mutations[0].target as HTMLElement;
+          const _svgData = this.svgsData.find(({ svg }) => (svg.node as any) === target);
+          const { x: svgX, y: svgY } = getNodeProps(_svgData.svg.node as unknown as HTMLElement);
+          const { x: childX, y: childY } = getNodeProps(
+            _svgData.child.svg.node as unknown as HTMLElement
+          );
+          _svgData.x = svgX;
+          _svgData.y = svgY;
+          _svgData.child.x = childX;
+          _svgData.child.y = childY;
+          throttle(() => {
+            document.dispatchEvent(
+              new CustomEvent('onUpdateSvgData', {
+                detail: { svgsData: this.svgsData }
+              })
+            );
+          }, 1000);
+        });
 
-      this.svgsData.push({
-        props: { label: '' },
-        svg: this.currSvg[0],
-        x: 0,
-        y: 0,
-        child: {
-          type: this.currSvg[2],
-          svg: this.currSvg[1],
+        observer.observe(this.currSvg[0].node, {
+          childList: true,
+          attributes: true
+        });
+
+        this.svgsData.push({
+          props: { label: '' },
+          svg: this.currSvg[0],
           x: 0,
           y: 0,
-          width: 0,
-          height: 0
-        }
-      });
-    }
+          child: {
+            type: this.currSvg[2],
+            svg: this.currSvg[1],
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0
+          }
+        });
+      }
 
-    this.isMouseDown = true;
+      this.isMouseDown = true;
+    }
     document.dispatchEvent(
       new CustomEvent('onWrapMouseDown', {
         detail: event
@@ -197,19 +228,18 @@ export class SVGWrap {
     if (!isMobile() && event.type === 'mouseup') {
       x = (event as MouseEvent).offsetX;
       y = (event as MouseEvent).offsetY;
-      // const { offsetX: x, offsetY: y } = event;
     } else if (isMobile() && event.type === 'touchend') {
       const vertex = getVertexPosition(this.$svgWrap);
       const touch = (event as TouchEvent).changedTouches[0];
       x = touch.pageX - vertex.left;
       y = touch.pageY - vertex.top;
     } else {
-      // touch start
       return;
     }
     const detail = this.getDetails(event, x, y);
     const currDraw = Draws[this.currDrawType];
-    if (currDraw?.onMouseUp) {
+
+    if (currDraw?.onMouseUp && this.currSvg) {
       currDraw.onMouseUp(detail, this.currSvg);
     }
 

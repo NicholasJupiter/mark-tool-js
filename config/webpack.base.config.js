@@ -1,7 +1,6 @@
 const webpack = require('webpack')
 // const { name } = require('../package.json')
 const { resolve } = require('path')
-const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const rootPath = resolve(__dirname, '../')
 
 module.exports = {
@@ -44,7 +43,7 @@ module.exports = {
   },
   plugins: [
     new webpack.ProgressPlugin(),
-    new webpack.optimize.ModuleConcatenationPlugin(),
-    new CleanWebpackPlugin()
+    new webpack.optimize.ModuleConcatenationPlugin()
+
   ]
 }

@@ -13,7 +13,6 @@ export function findParentBySvg(dom: HTMLElement): HTMLElement {
 type TProps = 'x' | 'y' | 'width' | 'height';
 const _props = ['x', 'y', 'width', 'height'];
 
-
 export function getNodeProps(node: HTMLElement) {
   const ret: { [T in TProps]: number } = {
     height: 0,
@@ -26,4 +25,28 @@ export function getNodeProps(node: HTMLElement) {
   }
 
   return ret;
+}
+
+export function throttle<T>(func: () => T, delay: number) {
+  let timeoutId: NodeJS.Timeout;
+  let lastExecTime = 0;
+
+  return function () {
+    const context = this;
+    const args = arguments;
+    const elapsed = Date.now() - lastExecTime;
+
+    const execute = function () {
+      func.apply(context, args);
+      lastExecTime = Date.now();
+    };
+
+    clearTimeout(timeoutId);
+
+    if (elapsed > delay) {
+      execute();
+    } else {
+      timeoutId = setTimeout(execute, delay - elapsed);
+    }
+  };
 }

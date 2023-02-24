@@ -19,6 +19,6 @@ export class LinesWrap {
 
   updateTools() {
     const tooltip = this.$linesWrap.querySelector('.tooltip-span');
-    tooltip.innerHTML = `X: ${this.x}<br />Y: ${this.y}`;
+    tooltip.innerHTML = `<span>X: ${this.x}</span><br /><span>Y: ${this.y}</span>`;
   }
 }

@@ -6,13 +6,13 @@ const rect: TDrawValue = {
     const { __startOffset, $svgContainer } = details;
     const { offsetX: startX, offsetY: startY } = __startOffset;
 
-    const draw = window.SVG($svgContainer.node).nested().move(startX, startY).draggable();
+    const draw = window.SVG($svgContainer.node).nested().move(startX, startY);
 
     const rect = draw
       .move(0, 0)
       .rect(1, 1)
-      .addClass('svgjs-rect-' + guid())
-      .resize();
+      .addClass('svgjs-rect-' + guid());
+      
     return [draw, rect, 'rect'];
   },
 
