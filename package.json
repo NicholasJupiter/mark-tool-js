@@ -1,6 +1,6 @@
 {
   "name": "mark-tool-js",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Annotation tools",
   "main": "dist/index.min.js",
   "types": "dist/index.d.ts",

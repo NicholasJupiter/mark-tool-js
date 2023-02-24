@@ -14,22 +14,23 @@ export type TCustomDragDetail = {
 };
 
 export type TDrawType = 'rect' | 'circle' | 'polygon';
-export type TDrawReturn = [Svg, TSVGChlid, TDrawType];
+export type TDrawReturn = [Svg, TSVGChlid, TDrawType, TSvgData?];
 
 export type TDrawValue = Partial<{
-  onMouseDown: (event: TCustomDragDetail, ...args: any[]) => TDrawReturn;
+  onMouseDown: (svgData: TSvgData, $svgContainer: Svg, ...args: any[]) => TDrawReturn;
   onDrag: (event: TCustomDragDetail, drawSvg: TDrawReturn, ...args: any[]) => void;
   onMouseUp: (event: TCustomDragDetail, drawSvg: TDrawReturn, ...args: any[]) => void;
+  onCreate: (svgData: TSvgData, $svgContainer: Svg) => TDrawReturn;
 }>;
 
 export type TSvgData = {
   props: Record<string, any> & { label: string };
-  svg: Element;
+  svg?: Element;
   x: number;
   y: number;
   child: {
     type: TDrawType;
-    svg: Element;
+    svg?: Element;
     x: number;
     y: number;
     width: number;

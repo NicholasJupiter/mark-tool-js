@@ -27,7 +27,7 @@ export function getNodeProps(node: HTMLElement) {
   return ret;
 }
 
-export function throttle<T>(func: () => T, delay: number) {
+export function throttle<T>(func: (...args: any[]) => T, delay: number) {
   let timeoutId: NodeJS.Timeout;
   let lastExecTime = 0;
 

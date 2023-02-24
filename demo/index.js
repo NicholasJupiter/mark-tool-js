@@ -6,3 +6,7 @@ const testImg = require('./assets/img.jpeg')
 const container = new Container($container, testImg.default)
 window.container = container
 container.startDraw('rect')
+
+window.addEventListener('onUpdateSvgData', (data) => {
+  console.log(data.detail.svgData)
+})

@@ -1,19 +1,18 @@
+import { Svg } from '@svgdotjs/svg.js';
 import { TDrawValue } from '../types/svg';
 import { guid } from '../utils/utils';
-
 const rect: TDrawValue = {
-  onMouseDown(details) {
-    const { __startOffset, $svgContainer } = details;
-    const { offsetX: startX, offsetY: startY } = __startOffset;
-
-    const draw = window.SVG($svgContainer.node).nested().move(startX, startY);
-
+  onCreate(svgData, $svgContainer) {
+    const draw = window.SVG($svgContainer.node).nested().move(svgData.x, svgData.y);
     const rect = draw
-      .move(0, 0)
-      .rect(1, 1)
+      .move(svgData.child.x, svgData.child.y)
+      .rect(svgData.child.width, svgData.child.height)
       .addClass('svgjs-rect-' + guid());
-      
-    return [draw, rect, 'rect'];
+
+    svgData.svg = draw;
+    svgData.child.svg = rect;
+
+    return [draw, rect, 'rect', svgData];
   },
 
   onDrag(details, [_, rect]) {
@@ -24,7 +23,7 @@ const rect: TDrawValue = {
       height = Math.abs(offsetY - startY),
       mx = Math.min(offsetX, startX),
       my = Math.min(offsetY, startY);
-      
+
     rect.size(width, height).move(mx, my);
   },
 
