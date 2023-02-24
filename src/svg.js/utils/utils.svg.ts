@@ -29,26 +29,16 @@ export function getNodeProps(node: HTMLElement) {
   return ret;
 }
 
-export function throttle<T>(func: (...args: any[]) => T, delay: number) {
+export function throttle<T>(func: (...args: any[]) => T, delay: number = 1000) {
   let timeoutId: NodeJS.Timeout;
-  let lastExecTime = 0;
-
-  return function () {
+  return function (...args: any[]) {
     const context = this;
-    const args = arguments;
-    const elapsed = Date.now() - lastExecTime;
-
-    const execute = function () {
+    if (timeoutId) return;
+    const execute = () => {
       func.apply(context, args);
-      lastExecTime = Date.now();
+      timeoutId = null;
     };
-
     clearTimeout(timeoutId);
-
-    if (elapsed > delay) {
-      execute();
-    } else {
-      timeoutId = setTimeout(execute, delay - elapsed);
-    }
+    timeoutId = setTimeout(execute, delay);
   };
 }

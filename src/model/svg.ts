@@ -143,6 +143,13 @@ export class SVGWrap {
               this.removeSelectize();
               const _svg = window.SVG.get(event.currentTarget.id);
               _svg.selectize().resize();
+              window.dispatchEvent(
+                new CustomEvent('onSelectSvg', {
+                  detail: {
+                    svgId: event.currentTarget.parentElement.id,
+                  }
+                })
+              )
             }
             event.type !== 'touchstart' && event.stopPropagation();
           },
