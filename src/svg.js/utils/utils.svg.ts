@@ -10,18 +10,20 @@ export function findParentBySvg(dom: HTMLElement): HTMLElement {
   }
   return findParentBySvg(dom.parentElement);
 }
-type TProps = 'x' | 'y' | 'width' | 'height';
-const _props = ['x', 'y', 'width', 'height'];
+type TProps = 'x' | 'y' | 'width' | 'height' | 'transform';
+const _props = ['x', 'y', 'width', 'height', 'transform'];
 
 export function getNodeProps(node: HTMLElement) {
-  const ret: { [T in TProps]: number } = {
+  const ret: { [T in TProps]: any } = {
     height: 0,
     width: 0,
     x: 0,
-    y: 0
+    y: 0,
+    transform: ''
   };
   for (const prop of _props) {
-    ret[prop as TProps] = Number(node ? node.getAttribute(prop) : 0);
+    const num = Number(node ? node.getAttribute(prop) : 0);
+    ret[prop as TProps] = isNaN(num) ? node.getAttribute(prop) : num;
   }
 
   return ret;

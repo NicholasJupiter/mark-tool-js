@@ -8,10 +8,9 @@ const rect: TDrawValue = {
       .move(svgData.child.x, svgData.child.y)
       .rect(svgData.child.width, svgData.child.height)
       .addClass('svgjs-rect-' + guid());
-
-    svgData.svg = draw;
-    svgData.child.svg = rect;
-
+    svgData.svgId = draw.id();
+    svgData.child.svgId = rect.id();
+    
     return [draw, rect, 'rect', svgData];
   },
 

@@ -26,10 +26,17 @@ export class SVGWrap {
     });
 
     window.addEventListener('svgjs-del', (data: any) => {
-      const $svg = data.detail.$svgEl as Svg;
-      const index = this.svgsData.findIndex(({ svg }) => (svg.node as any) === $svg.node);
-      this.svgsData.splice(index, 1);
-      $svg.remove();
+      const del = (svgId: string) => {
+        const index = this.svgsData.findIndex((svg) => svg.svgId === svgId);
+        this.svgsData.splice(index, 1);
+        window.SVG.get(svgId).remove();
+      };
+      const { svgIds } = data.detail;
+      if (Array.isArray(svgIds)) {
+        for (const id of svgIds) {
+          del(id);
+        }
+      }
     });
   }
 
@@ -196,6 +203,7 @@ export class SVGWrap {
 
     if (currDraw?.onMouseUp && this.currSvg) {
       currDraw.onMouseUp(detail, this.currSvg);
+      this.currSvg = null;
     }
 
     window.dispatchEvent(
@@ -270,27 +278,36 @@ export class SVGWrap {
 
   /**
    *
-   * @param svg string: querySelector([string])
+   * @param id string: querySelector([string]) | dom
    * @returns
    */
-  deleteSvgDom(svg: string | HTMLElement) {
-    if (!svg) return;
-    let _svg: Svg;
-    if (typeof svg === 'string') {
-      if (svg.startsWith('#')) {
-        const $svg = document.querySelector(svg);
-        _svg = window.SVG.get($svg.id);
-      } else {
-        _svg = window.SVG.get(svg);
+  deleteSvgDom(id: string | HTMLElement) {
+    if (!id) return;
+    let svgId: string = id as string;
+    if (typeof id === 'string') {
+      if (id.startsWith('#')) {
+        svgId = document.querySelector(id)?.id;
+      }else {
+        svgId = id;
       }
     } else {
-      _svg = window.SVG.get(svg.id);
+      svgId = (id as HTMLElement).id;
     }
 
     window.dispatchEvent(
       new CustomEvent('svgjs-del', {
         detail: {
-          $svgEl: _svg
+          svgIds: [svgId]
+        }
+      })
+    );
+  }
+
+  deleteAllSvgDom() {
+    window.dispatchEvent(
+      new CustomEvent('svgjs-del', {
+        detail: {
+          svgIds: this.svgsData.map(({ svgId }) => svgId)
         }
       })
     );
@@ -299,26 +316,29 @@ export class SVGWrap {
   private observerDom() {
     const throCall = throttle((mutations: MutationCallback) => {
       const target = mutations[0].target as HTMLElement;
-      const _svgData = this.svgsData.find(({ svg }) => (svg.node as any) === target);
-      const { x: svgX, y: svgY } = getNodeProps(_svgData.svg.node as unknown as HTMLElement);
+      const svgData = this.svgsData.find(({ svgId }) => svgId === target.id);
+      const $svg = window.SVG.get(svgData.svgId);
+      const $svgChild = window.SVG.get(svgData.child.svgId);
+      const { x: svgX, y: svgY } = getNodeProps($svg.node as HTMLElement);
       const {
         x: childX,
         y: childY,
         width,
-        height
-      } = getNodeProps(_svgData.child.svg.node as unknown as HTMLElement);
-      _svgData.x = svgX;
-      _svgData.y = svgY;
-      _svgData.child.x = childX;
-      _svgData.child.y = childY;
-      _svgData.child.width = width;
-      _svgData.child.height = height;
+        height,
+        transform
+      } = getNodeProps($svgChild.node as HTMLElement);
+      svgData.x = svgX;
+      svgData.y = svgY;
+      svgData.child.x = childX;
+      svgData.child.y = childY;
+      svgData.child.width = width;
+      svgData.child.height = height;
+      svgData.child.transform = transform;
       window.dispatchEvent(
         new CustomEvent('onUpdateSvgData', {
           detail: { svgsData: this.svgsData }
         })
       );
-      console.log(_svgData);
     }, 1000);
 
     const observer = new window.MutationObserver(throCall);

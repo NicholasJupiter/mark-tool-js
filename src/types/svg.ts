@@ -25,15 +25,16 @@ export type TDrawValue = Partial<{
 
 export type TSvgData = {
   props: Record<string, any> & { label: string };
-  svg?: Element;
+  svgId?: string;
   x: number;
   y: number;
   child: {
     type: TDrawType;
-    svg?: Element;
+    svgId?: string;
     x: number;
     y: number;
     width: number;
     height: number;
+    transform?: string;
   };
 };

@@ -66,4 +66,9 @@ export class Container {
   endDraw() {
     this.$SvgWrap.currDrawType = null;
   }
+
+  async switchImage (src:string) {
+    await this.$ImgWrap.updateSrc(src);
+    this.$SvgWrap.deleteAllSvgDom();
+  }
 }

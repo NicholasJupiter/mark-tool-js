@@ -17,26 +17,24 @@ export class ImgWrap {
     this.updateSrc(this.src);
   }
 
-  updateSrc(src: string) {
+  async updateSrc(src: string) {
     if (!src) return;
-    loadImage(src).then(($img) => {
-      $img.setAttribute('draggable', 'false');
-      $img.classList.add('work-img');
-      this.$img = $img;
-
-      if (this.$imgWrap.querySelector('.work-img')) {
-        this.$imgWrap.querySelector('.work-img').remove();
-      }
-
-      this.$imgWrap.appendChild(this.$img);
-      window.dispatchEvent(
-        new CustomEvent('onWrapUpdateVars', {
-          detail: {
-            '--img-height': $img.height + 'px',
-            '--img-width': $img.width + 'px'
-          }
-        })
-      );
-    });
+    const $img = await loadImage(src);
+    $img.setAttribute('draggable', 'false');
+    $img.classList.add('work-img');
+    this.$img = $img;
+    if (this.$imgWrap.querySelector('.work-img')) {
+      this.$imgWrap.querySelector('.work-img').remove();
+    }
+    this.$imgWrap.appendChild(this.$img);
+    window.dispatchEvent(
+      new CustomEvent('onWrapUpdateVars', {
+        detail: {
+          '--img-height': $img.height + 'px',
+          '--img-width': $img.width + 'px'
+        }
+      })
+    );
+    
   }
 }
