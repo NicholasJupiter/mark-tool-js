@@ -1,26 +1,28 @@
 import type { Svg } from '@svgdotjs/svg.js';
 import { TCustomDragDetail, TDrawReturn, TDrawType, TSVGChlid, TSvgData } from '../types/svg';
 import { Draws } from '../draws/index';
-import { findParentBySvg, getNodeProps, throttle } from '../svg.js/utils/utils.svg';
-import { getVertexPosition, isMobile } from '../utils/utils';
-
+import { findParentBySvg, findSvgChild, getNodeProps, throttle } from '../svg.js/utils/utils.svg';
+import { getVertexPosition, isMobile, isMove, ObjectForeach } from '../utils/utils';
 export class SVGWrap {
   $svgWrap: HTMLDivElement;
   $svgContainer: Svg;
-  mouseDownClient = { offsetX: 0, offsetY: 0 };
+  mouseDownClient?: { offsetX: number; offsetY: number } = null;
   currDrawType: TDrawType;
   isMouseDown = false;
   currSvg: TDrawReturn = null;
   currClickSvg: Svg;
   svgsData: TSvgData[] = [];
   isPreview = false;
+  childMaxLen = 1; // -1无限
 
   constructor(_$svgWrap: HTMLDivElement) {
     this.initSvgWrap(_$svgWrap);
     this.$svgContainer = window.SVG(this.$svgWrap);
 
     this.$svgContainer.on('click', (event) => {
+      // 判断是为了避免拖动问题
       if (!(event.target as HTMLElement).classList.contains('svg_select_points')) {
+        this.sendCustomEvent('onContainerClick', { event });
         this.removeSelectize();
       }
     });
@@ -31,31 +33,34 @@ export class SVGWrap {
         this.svgsData.splice(index, 1);
         window.SVG.get(svgId).remove();
       };
-      const { svgIds } = data.detail;
+      const { svgIds, mode } = data.detail;
       if (Array.isArray(svgIds)) {
         for (const id of svgIds) {
           del(id);
         }
       }
+      this.sendCustomEvent('onUpdateSvgData', { svgsData: this.getCloneSvgsData(), mode });
     });
   }
 
   removeSelectize(fn?: (child: Svg, contentEl?: Svg) => void) {
-    for (let i = 0; i < this.$svgContainer.node.children.length; i++) {
-      const child = this.$svgContainer.node.children.item(i);
-      const contentEl = window.SVG.get(child.id).node.querySelector('[class^=svgjs-]');
+    for (const svg of this.$svgContainer.node.children) {
+      const contentEl = findSvgChild(svg as HTMLElement);
       if (contentEl) {
         window.SVG.get(contentEl.id).selectize(false);
       }
-      fn && fn(window.SVG.get(child.id), contentEl && window.SVG.get(contentEl.id));
+      fn && fn(window.SVG.get(svg.id), contentEl && window.SVG.get(contentEl.id));
     }
+    this.sendCustomEvent('onCancelSelectSvg');
   }
 
   switchPreviewStatus(_isPreview: boolean): boolean {
     this.isPreview = _isPreview ?? !this.isPreview;
+
     this.removeSelectize((child) => {
       child.draggable(!this.isPreview);
     });
+
     return this.isPreview;
   }
 
@@ -90,14 +95,50 @@ export class SVGWrap {
     const target = event.target as HTMLElement;
     const svg = findParentBySvg(target);
     event.stopPropagation();
-    window.dispatchEvent(
-      new CustomEvent('onWrapClick', {
-        detail: {
-          event,
-          svg
-        }
-      })
-    );
+    this.sendCustomEvent('onWrapClick', { event, svgId: svg.id });
+  }
+
+  private _onCreate(svgData: TSvgData): TDrawReturn | null {
+    const currDraw = Draws[svgData.child.type];
+    if (currDraw?.onCreate) {
+      const svgResult = currDraw.onCreate(svgData, this.$svgContainer);
+      if (!this.isPreview) {
+        svgResult[0].draggable();
+      }
+      svgResult[1].on(
+        'click,touchstart',
+        (event: any) => {
+          if (!this.isPreview) {
+            this.removeSelectize();
+            const _svg = window.SVG.get(event.currentTarget.id);
+            _svg
+              .selectize({
+                pointSize: 14
+              })
+              .resize();
+            this.sendCustomEvent('onSelectSvg', { svgId: event.currentTarget.parentElement.id });
+          }
+          event.type !== 'touchstart' && event.stopPropagation();
+        },
+        false
+      );
+
+      this.observerDom(svgResult);
+
+      this.svgsData.push(svgResult[3]);
+      this.sendCustomEvent('onUpdateSvgData', { svgsData: this.getCloneSvgsData(), mode: 'push' });
+      return svgResult;
+    }
+  }
+
+  private _onDrag(event: MouseEvent | TouchEvent, x: number, y: number) {
+    const detail = this.getDetails(event, x, y);
+
+    const currDraw = Draws[this.currDrawType];
+    if (currDraw?.onDrag && this.currSvg) {
+      currDraw.onDrag(detail, this.currSvg);
+    }
+    this.sendCustomEvent('onWrapDrag', detail);
   }
 
   private onTouchStart(event: MouseEvent | TouchEvent) {
@@ -110,75 +151,37 @@ export class SVGWrap {
     });
     if (!offset) return;
     const { x, y } = offset;
-    if ((event.target as HTMLElement).parentElement === event.currentTarget && !this.isPreview) {
+
+    if (
+      (event.target as HTMLElement).parentElement === event.currentTarget &&
+      !this.isPreview &&
+      !this.getWhetherLenOver()
+    ) {
       this.mouseDownClient = {
         offsetX: x,
         offsetY: y
       };
-      const currDraw = Draws[this.currDrawType];
-
-      if (currDraw?.onCreate) {
-        this.currSvg = currDraw.onCreate(
-          {
-            x: this.mouseDownClient.offsetX,
-            y: this.mouseDownClient.offsetY,
-            props: { label: '' },
-            child: {
-              x: 0,
-              y: 0,
-              type: 'rect',
-              width: 1,
-              height: 1
-            }
-          },
-          this.$svgContainer
-        );
-        if (!this.isPreview) {
-          this.currSvg[0].draggable();
+      const svgData = {
+        x: 0,
+        y: 0,
+        props: { label: '' },
+        child: {
+          x: this.mouseDownClient.offsetX,
+          y: this.mouseDownClient.offsetY,
+          type: this.currDrawType,
+          width: 1,
+          height: 1
         }
-        this.currSvg[1].on(
-          'click,touchstart',
-          (event: any) => {
-            if (!this.isPreview) {
-              this.removeSelectize();
-              const _svg = window.SVG.get(event.currentTarget.id);
-              _svg.selectize().resize();
-              window.dispatchEvent(
-                new CustomEvent('onSelectSvg', {
-                  detail: {
-                    svgId: event.currentTarget.parentElement.id,
-                  }
-                })
-              )
-            }
-            event.type !== 'touchstart' && event.stopPropagation();
-          },
-          false
-        );
+      };
 
-        this.observerDom();
-
-        this.svgsData.push(this.currSvg[3]);
+      const svgResult = this._onCreate(svgData);
+      if (svgResult) {
+        this.currSvg = svgResult;
       }
 
       this.isMouseDown = true;
     }
-    window.dispatchEvent(
-      new CustomEvent('onWrapMouseDown', {
-        detail: event
-      })
-    );
-  }
-
-  private onDrag(event: MouseEvent | TouchEvent, x: number, y: number) {
-    const detail = this.getDetails(event, x, y);
-
-    const currDraw = Draws[this.currDrawType];
-    if (currDraw?.onDrag && this.currSvg) {
-      currDraw.onDrag(detail, this.currSvg);
-    }
-
-    window.dispatchEvent(new CustomEvent('onWrapDrag', { detail }));
+    this.sendCustomEvent('onWrapMouseDown', { event });
   }
 
   private onTouchMove(event: MouseEvent | TouchEvent) {
@@ -192,9 +195,9 @@ export class SVGWrap {
     const detail = this.getDetails(event, x, y);
 
     if (this.isMouseDown) {
-      this.onDrag(event, x, y);
+      this._onDrag(event, x, y);
     } else {
-      window.dispatchEvent(new CustomEvent('onWrapMouseMove', { detail }));
+      this.sendCustomEvent('onWrapMouseMove', detail);
     }
   }
 
@@ -208,22 +211,28 @@ export class SVGWrap {
     const detail = this.getDetails(event, x, y);
     const currDraw = Draws[this.currDrawType];
 
-    if (currDraw?.onMouseUp && this.currSvg) {
+    if (currDraw?.onMouseUp && this.currSvg && this.mouseDownClient) {
+      if (!isMove(this.mouseDownClient, { offsetX: x, offsetY: y })) {
+        this.removeSelectize();
+      }
       currDraw.onMouseUp(detail, this.currSvg);
+      const svgData = this.svgsData.find(({ svgId }) => svgId === this.currSvg[0].id());
+      if (svgData) {
+        const prop = getNodeProps(findSvgChild(window.SVG.get(svgData!.svgId).node));
+        ObjectForeach(prop, (value, key) => {
+          svgData.child[key] = value;
+        });
+      }
+      this.sendCustomEvent('onUpdateSvgData', {
+        svgsData: this.getCloneSvgsData(),
+        mode: 'touchEnd'
+      });
       this.currSvg = null;
     }
-
-    window.dispatchEvent(
-      new CustomEvent('onWrapMouseUp', {
-        detail
-      })
-    );
+    this.sendCustomEvent('onWrapMouseUp', detail);
 
     this.isMouseDown = false;
-    this.mouseDownClient = {
-      offsetX: 0,
-      offsetY: 0
-    };
+    this.mouseDownClient = null;
   }
 
   private getEventOffset(
@@ -254,6 +263,13 @@ export class SVGWrap {
     }
   }
 
+  private sendLinesLocation(x: number, y: number) {
+    this.sendCustomEvent('onWrapUpdateVars', {
+      '--location-x': x + 'px',
+      '--location-y': y + 'px'
+    });
+  }
+
   getDetails(event: MouseEvent | TouchEvent, offsetX: number, offsetY: number): TCustomDragDetail {
     return {
       event,
@@ -264,22 +280,14 @@ export class SVGWrap {
     };
   }
 
-  private sendLinesLocation(x: number, y: number) {
-    window.dispatchEvent(
-      new CustomEvent('onWrapUpdateVars', {
-        detail: {
-          '--location-x': x + 'px',
-          '--location-y': y + 'px'
-        }
-      })
-    );
+  getWhetherLenOver() {
+    if (this.childMaxLen === -1) return false;
+    return this.childMaxLen <= this.svgsData.length;
   }
 
   addSvgDom(svgData: TSvgData) {
-    const draw = Draws[svgData.child.type];
-    if (draw) {
-      const currSvgData = draw.onCreate(svgData, this.$svgContainer);
-      this.svgsData.push(currSvgData[3]);
+    if (!this.getWhetherLenOver()) {
+      this._onCreate(svgData);
     }
   }
 
@@ -294,46 +302,35 @@ export class SVGWrap {
     if (typeof id === 'string') {
       if (id.startsWith('#')) {
         svgId = document.querySelector(id)?.id;
-      }else {
+      } else {
         svgId = id;
       }
     } else {
       svgId = (id as HTMLElement).id;
     }
-
-    window.dispatchEvent(
-      new CustomEvent('svgjs-del', {
-        detail: {
-          svgIds: [svgId]
-        }
-      })
-    );
+    this.sendCustomEvent('svgjs-del', { svgIds: [svgId], mode: 'delete' });
   }
 
-  deleteAllSvgDom() {
-    window.dispatchEvent(
-      new CustomEvent('svgjs-del', {
-        detail: {
-          svgIds: this.svgsData.map(({ svgId }) => svgId)
-        }
-      })
-    );
+  deleteAllSvgDom(mode = 'deleteAll') {
+    this.sendCustomEvent('svgjs-del', {
+      svgIds: this.svgsData.map(({ svgId }) => svgId),
+      mode
+    });
   }
 
-  private observerDom() {
+  sendCustomEvent(name: string, detail: Record<string, any> = {}) {
+    window.dispatchEvent(new CustomEvent(name, { detail }));
+  }
+
+  private observerDom(svgResult: TDrawReturn) {
     const throCall = throttle((mutations: MutationCallback) => {
       const target = mutations[0].target as HTMLElement;
       const svgData = this.svgsData.find(({ svgId }) => svgId === target.id);
+      if (!svgData?.svgId) return;
       const $svg = window.SVG.get(svgData.svgId);
       const $svgChild = window.SVG.get(svgData.child.svgId);
-      const { x: svgX, y: svgY } = getNodeProps($svg.node as HTMLElement);
-      const {
-        x: childX,
-        y: childY,
-        width,
-        height,
-        transform
-      } = getNodeProps($svgChild.node as HTMLElement);
+      const { x: svgX, y: svgY } = getNodeProps($svg.node);
+      const { x: childX, y: childY, width, height, transform } = getNodeProps($svgChild.node);
       svgData.x = svgX;
       svgData.y = svgY;
       svgData.child.x = childX;
@@ -341,18 +338,21 @@ export class SVGWrap {
       svgData.child.width = width;
       svgData.child.height = height;
       svgData.child.transform = transform;
-      window.dispatchEvent(
-        new CustomEvent('onUpdateSvgData', {
-          detail: { svgsData: this.svgsData }
-        })
-      );
-    }, 1000);
+      this.sendCustomEvent('onUpdateSvgData', {
+        svgsData: this.getCloneSvgsData(),
+        mode: 'domUpdate'
+      });
+    }, 200);
 
     const observer = new window.MutationObserver(throCall);
 
-    observer.observe(this.currSvg[0].node, {
+    observer.observe(svgResult[0].node, {
       childList: true,
       attributes: true
     });
+  }
+
+  getCloneSvgsData() {
+    return JSON.parse(JSON.stringify(this.svgsData));
   }
 }

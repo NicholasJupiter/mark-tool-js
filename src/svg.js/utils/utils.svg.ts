@@ -13,7 +13,7 @@ export function findParentBySvg(dom: HTMLElement): HTMLElement {
 type TProps = 'x' | 'y' | 'width' | 'height' | 'transform';
 const _props = ['x', 'y', 'width', 'height', 'transform'];
 
-export function getNodeProps(node: HTMLElement) {
+export function getNodeProps(node: HTMLElement | SVGSVGElement) {
   const ret: { [T in TProps]: any } = {
     height: 0,
     width: 0,
@@ -41,4 +41,8 @@ export function throttle<T>(func: (...args: any[]) => T, delay: number = 1000) {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(execute, delay);
   };
+}
+
+export function findSvgChild(svg: HTMLElement | SVGSVGElement) {
+  return svg.querySelector('[class^=svgjs-]') as HTMLElement;
 }

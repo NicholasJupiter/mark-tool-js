@@ -61,14 +61,20 @@ export class Container {
   }
 
   startDraw(type: TDrawType) {
+    this.$ImgWrap.$imgWrap.style.overflow = !type ? 'auto' : 'hidden';
     this.$SvgWrap.currDrawType = type;
   }
+
   endDraw() {
     this.$SvgWrap.currDrawType = null;
   }
 
-  async switchImage (src:string) {
+  async switchImage(src: string) {
     await this.$ImgWrap.updateSrc(src);
-    this.$SvgWrap.deleteAllSvgDom();
+    this.$SvgWrap.sendCustomEvent('onUpdateSvgData', {
+      svgsData: this.$SvgWrap.svgsData,
+      mode: 'switchImageBefore'
+    });
+    this.$SvgWrap.deleteAllSvgDom('switchImageAfter');
   }
 }

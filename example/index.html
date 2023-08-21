@@ -35,8 +35,15 @@
   <body>
     <div class="work-container" id="work-container">
       <div class="work-container__left">
-        <div class="item" id="del">del[0]</div>
-        <div class="item" id="clear">Clear</div>
+        <div class="item" onclick="copySvg()">add[0]</div>
+        <div class="item" onclick="onDeletebtnClick()">del[0]</div>
+        <div class="item" onclick="onDeleteAllClick()">Clear</div>
+        <div class="item" onclick="onSwitchImage()">switchImage</div>
+        <div class="item" onclick="onSaveCoco()">cocoJson</div>
+        <div class="item" onclick="switchPreview()">preview</div>
+        <!-- <div class="item" onclick="switchOperate()">switchOperate</div> -->
+        <div class="item" onclick="switchOperate('rect')">rect</div>
+        <div class="item" onclick="switchOperate('polygon')">polygin</div>
       </div>
       <div class="work-container__content">
         <div class="work-container__content-wrap">

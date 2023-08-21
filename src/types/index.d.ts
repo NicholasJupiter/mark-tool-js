@@ -10,15 +10,19 @@ declare module '*.tiff';
 
 declare module '@svgdotjs/svg.js' {
   interface Element {
-    selectize(...args): this;
+    selectize(...args): this & { pointSize: (number) => this };
     resize(): this;
     get(...args): this;
     draggable(arg1?: boolean = true): this;
+    get(arg1: string): this;
   }
+}
+interface ISvg extends Svg {
+  (dom: any): Svg;
 }
 
 declare global {
   interface Window {
-    SVG: any;
+    SVG: ISvg;
   }
 }

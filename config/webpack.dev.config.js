@@ -9,7 +9,7 @@ const rootPath = resolve(__dirname, '../')
 module.exports = merge(baseConfig, {
   mode: 'development',
   entry: {
-    index: resolve(rootPath, 'demo/index.js')
+    index: resolve(rootPath, 'example/index.js')
   },
   output: {
     filename: '[name].min.js',
@@ -26,12 +26,12 @@ module.exports = merge(baseConfig, {
   plugins: [
     new HtmlWebpackPlugin({
       filename: 'index.html',
-      template: resolve(rootPath, 'demo/index.html')
+      template: resolve(rootPath, 'example/index.html')
     }),
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: resolve(rootPath, './demo/assets/'),
+          from: resolve(rootPath, './example/assets/'),
           to: resolve(rootPath, './assets/dist/')
         }
       ]

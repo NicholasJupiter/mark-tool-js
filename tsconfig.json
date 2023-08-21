@@ -8,7 +8,7 @@
     "baseUrl": ".",
     "declaration": true,
     "sourceMap": true,
-    "lib": ["esnext", "dom"],
+    "lib": ["esnext", "dom", "DOM.Iterable"],
   },
   "include": [
     "./src/**/*",

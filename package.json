@@ -1,6 +1,6 @@
 {
-  "name": "mark-tool-js",
-  "version": "1.2.5",
+  "name": "mark-tool-svg-js",
+  "version": "1.3.9",
   "description": "Annotation tools",
   "main": "dist/index.min.js",
   "types": "dist/index.d.ts",
@@ -13,9 +13,9 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/NicholasJupiter/mark-tool-js"
+    "url": "https://github.com/NicholasJupiter/mark-tool-svg-js"
   },
-  "homepage": "https://github.com/NicholasJupiter/mark-tool-js",
+  "homepage": "https://github.com/NicholasJupiter/mark-tool-svg-js",
   "keywords": [
     "label",
     "ai",
